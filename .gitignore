@@ -16,3 +16,11 @@ WORK/
 DELETE/
 ENV/
 SPEC/doc-classifier-docs.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# DB・アップロードファイル（ローカルデータ）
+src/backend/data/
