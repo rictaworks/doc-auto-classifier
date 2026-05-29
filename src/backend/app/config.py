@@ -3,7 +3,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+_root = Path(__file__).resolve()
+for _p in _root.parents:
+    if (_p / ".env").exists():
+        load_dotenv(_p / ".env", override=False)
+        break
 
 APP_ENV: str = os.environ.get("APP_ENV", "development")
 
