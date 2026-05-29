@@ -1,0 +1,18 @@
+# 環境変数
+.env
+.env.*
+
+# Claude Code 設定
+.claude/
+
+# GitHub テンプレート
+.github/
+
+# プロジェクト管理ドキュメント
+TASKS/
+DEBUG/
+CLIENT/
+WORK/
+DELETE/
+ENV/
+SPEC/doc-classifier-docs.md
