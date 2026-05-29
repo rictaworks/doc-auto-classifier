@@ -82,6 +82,22 @@ DEV_USER_EMAIL=dev@example.com
 
 ---
 
+## デモ版について
+
+`src/backend/` に収録されているデモ版は、製品版と設計が異なります。
+
+| 項目 | デモ版 | 製品版（MVP以降） |
+|---|---|---|
+| 技術スタック | FastAPI + SQLite + Jinja2 | Next.js + Rails + PostgreSQL |
+| 認証 | なし（認証不要） | Google OAuth |
+| AI分類 | ルールベース（キーワードマッチ） | AI分類・AI要約 |
+| デプロイ | ローカル起動（uvicorn） | Vercel + Render/Railway |
+| 同時アクセス | 単一プロセスのみ | 複数ユーザー対応 |
+
+デモ版はあくまで機能体験用の最小実装です。本番移行時はアーキテクチャを製品版に切り替えてください。
+
+---
+
 ## 開発環境のセットアップ
 
 [ENV/DEVELOPMENT.md](./ENV/DEVELOPMENT.md) を参照すること。
