@@ -1,5 +1,8 @@
+import logging
 from pathlib import Path
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +12,8 @@ from app.database import Base, engine, SessionLocal
 from app.models import Category
 from app.routers import files as files_router
 from app.routers import categories as categories_router
+
+logger = logging.getLogger(__name__)
 
 Base.metadata.create_all(bind=engine)
 
@@ -37,7 +42,21 @@ def _seed_categories() -> None:
 
 _seed_categories()
 
+
+def _reset_db() -> None:
+    logger.info("daily DB reset start")
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    _seed_categories()
+    logger.info("daily DB reset complete")
+
+
 app = FastAPI(title="書類自動分類ツール", version="1.0.0")
+
+# JST 03:00 = UTC 18:00 前日
+_scheduler = BackgroundScheduler(timezone="Asia/Tokyo")
+_scheduler.add_job(_reset_db, CronTrigger(hour=3, minute=0, timezone="Asia/Tokyo"))
+_scheduler.start()
 
 _base_dir = Path(__file__).parent
 app.mount("/static", StaticFiles(directory=str(_base_dir / "static")), name="static")
