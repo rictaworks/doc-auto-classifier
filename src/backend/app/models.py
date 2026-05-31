@@ -38,6 +38,7 @@ class File(Base):
     __tablename__ = "files"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    session_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
     original_name: Mapped[str] = mapped_column(String, nullable=False)
     stored_name: Mapped[str] = mapped_column(String, nullable=False)
     file_path: Mapped[str] = mapped_column(String, nullable=False)
