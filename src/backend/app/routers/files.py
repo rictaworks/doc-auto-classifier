@@ -1,6 +1,7 @@
+import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Cookie, Depends, File, Form, Response, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -11,9 +12,28 @@ from app.config import UPLOAD_DIR
 
 router = APIRouter(prefix="/api/files", tags=["files"])
 
+SESSION_COOKIE = "doc_sid"
 
-def _service(db: Session = Depends(get_db)) -> FileService:
-    return FileService(db=db, upload_dir=Path(UPLOAD_DIR))
+
+def get_session_id(response: Response, doc_sid: str | None = Cookie(default=None)) -> str:
+    if doc_sid:
+        return doc_sid
+    new_sid = str(uuid.uuid4())
+    response.set_cookie(
+        key=SESSION_COOKIE,
+        value=new_sid,
+        httponly=True,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 365,  # 1年
+    )
+    return new_sid
+
+
+def _service(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> FileService:
+    return FileService(db=db, upload_dir=Path(UPLOAD_DIR), session_id=session_id)
 
 
 class CategoryUpdate(BaseModel):
