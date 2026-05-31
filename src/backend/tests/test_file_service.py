@@ -30,9 +30,12 @@ def session():
     Base.metadata.drop_all(bind=engine)
 
 
+TEST_SESSION_ID = "test-session-uuid-1234"
+
+
 @pytest.fixture
 def service(session, tmp_path):
-    return FileService(db=session, upload_dir=tmp_path)
+    return FileService(db=session, upload_dir=tmp_path, session_id=TEST_SESSION_ID)
 
 
 class TestUpload:
@@ -163,6 +166,30 @@ class TestTags:
         service.add_tag(f.id, "重要")
         updated = service.add_tag(f.id, "重要")
         assert len([t for t in updated.tags if t.name == "重要"]) == 1
+
+
+class TestSessionIsolation:
+    def test_other_session_cannot_see_files(self, session, tmp_path):
+        svc_a = FileService(db=session, upload_dir=tmp_path, session_id="session-a")
+        svc_b = FileService(db=session, upload_dir=tmp_path, session_id="session-b")
+        content = b"secret doc"
+        upload = UploadFile(filename="secret.txt", file=io.BytesIO(content))
+        upload.size = len(content)
+        svc_a.upload(upload, hp_field="")
+        result = svc_b.list_files()
+        assert result.total == 0
+
+    def test_other_session_cannot_delete_file(self, session, tmp_path):
+        from fastapi import HTTPException
+        svc_a = FileService(db=session, upload_dir=tmp_path, session_id="session-a")
+        svc_b = FileService(db=session, upload_dir=tmp_path, session_id="session-b")
+        content = b"hello"
+        upload = UploadFile(filename="file.txt", file=io.BytesIO(content))
+        upload.size = len(content)
+        f = svc_a.upload(upload, hp_field="")
+        with pytest.raises(HTTPException) as exc:
+            svc_b.delete(f.id)
+        assert exc.value.status_code == 404
 
 
 class TestDelete:

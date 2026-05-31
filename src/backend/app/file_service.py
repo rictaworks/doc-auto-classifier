@@ -28,6 +28,7 @@ _classifier = ClassifierService()
 class FileService:
     db: DBSession
     upload_dir: Path
+    session_id: str
 
     def upload(self, file: UploadFile, hp_field: str) -> File:
         if hp_field:
@@ -75,6 +76,7 @@ class FileService:
         mime_type = mimetypes.guess_type(file.filename)[0] or "application/octet-stream"
 
         record = File(
+            session_id=self.session_id,
             original_name=file.filename,
             stored_name=stored_name,
             file_path=str(dest),
@@ -95,7 +97,7 @@ class FileService:
         tag: str = "",
         page: int = 1,
     ) -> PageResult:
-        q = self.db.query(File)
+        q = self.db.query(File).filter(File.session_id == self.session_id)
 
         if query:
             q = q.filter(File.original_name.contains(query))
@@ -112,7 +114,10 @@ class FileService:
         return PageResult(items=items, total=total, page=page, page_size=PAGE_SIZE)
 
     def get(self, file_id: int) -> File:
-        record = self.db.query(File).filter(File.id == file_id).first()
+        record = self.db.query(File).filter(
+            File.id == file_id,
+            File.session_id == self.session_id,
+        ).first()
         if record is None:
             raise HTTPException(status_code=404, detail="ファイルが見つかりません")
         return record
