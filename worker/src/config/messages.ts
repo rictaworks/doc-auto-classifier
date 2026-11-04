@@ -1,0 +1,20 @@
+export const MESSAGES = {
+  badRequest: "Bad request",
+  fileMissing: "ファイルを指定してください",
+  fileNameMissing: "ファイル名が取得できません",
+  fileEmpty: "ファイルが空です",
+  fileTooLarge: "ファイルサイズが上限を超えています",
+  extensionNotAllowed: "許可されていない拡張子",
+  magicMismatch: "ファイルの内容が拡張子と一致しません",
+  fileNotFound: "ファイルが見つかりません",
+  storageMissing: "ファイルの実体が見つかりません",
+  categoryNotFound: "カテゴリが存在しません",
+  categoryIdInvalid: "カテゴリ ID が不正です",
+  tagNameRequired: "タグ名を入力してください",
+  pageInvalid: "ページ番号が不正です",
+  jsonInvalid: "リクエストの形式が不正です",
+  notFound: "ページが見つかりません",
+  internalError: "内部エラーが発生しました",
+  appEnvInvalid: "APP_ENV の値が不正です（development / test / production のいずれか）",
+  categoryMasterMissing: "分類先のカテゴリがマスタに存在しません"
+} as const;

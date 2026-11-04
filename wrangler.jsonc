@@ -1,0 +1,68 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // 移行元（Railway / FastAPI）の railway.toml・src/backend は残したまま、Cloudflare 版は本ファイルで構成する。
+  "name": "doc-auto-classifier",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "account_id": "9c5183bedab008ccef3581056752fa6f",
+  // 既定は production（素の `wrangler deploy` で Secure Cookie が外れないように）。ローカルは `npm run dev` が development を渡す。
+  "vars": {
+    "APP_ENV": "production"
+  },
+  // 静的ファイル（public/）は Workers Assets で配信し、/api/* だけ Worker（Hono）を先に実行する。
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  // D1 の database_id は未作成のためプレースホルダ。`wrangler d1 create doc-auto-classifier-db` の結果で置き換える。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "doc-auto-classifier-db",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // アップロードファイルの実体。D1 の 1 行サイズ上限より大きい（最大 10MB）ため R2 に置く。バケットは未作成。
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "doc-auto-classifier-files"
+    }
+  ],
+  // JST 03:00 = UTC 18:00（前日）に全ファイル記録を削除する日次リセット（旧 APScheduler と同じ時刻）。
+  "triggers": {
+    "crons": ["0 18 * * *"]
+  },
+  "env": {
+    "production": {
+      "name": "doc-auto-classifier",
+      "vars": {
+        "APP_ENV": "production"
+      },
+      "assets": {
+        "directory": "./public",
+        "binding": "ASSETS",
+        "run_worker_first": ["/api/*"]
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "doc-auto-classifier-db",
+          "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "doc-auto-classifier-files"
+        }
+      ],
+      "triggers": {
+        "crons": ["0 18 * * *"]
+      }
+    }
+  }
+}

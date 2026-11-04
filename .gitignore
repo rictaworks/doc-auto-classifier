@@ -24,3 +24,10 @@ __pycache__/
 
 # DB・アップロードファイル（ローカルデータ）
 src/backend/data/
+
+# Cloudflare 版（Workers + D1 + R2）
+!.env.example
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
